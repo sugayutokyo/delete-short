@@ -14,7 +14,7 @@ chrome.storage.sync.get({ hideShorts: true, maskSoccer: true, enabled: true }, (
 
   applyHideShorts(isHideShortsEnabled);
   if (isMaskSoccerEnabled) {
-    scheduleSoccerScan();
+    triggerScanBurst();
   }
 });
 
@@ -52,39 +52,61 @@ const VIDEO_SELECTORS = [
   "ytd-video-renderer",
   "ytd-grid-video-renderer",
   "ytd-compact-video-renderer",
-  "yt-lockup-view-model"
+  "yt-lockup-view-model",
+  "ytd-playlist-video-renderer"
 ];
 
+// 多様なYouTubeのDOM構造からタイトルを確実に抽出
 function getVideoTitle(card) {
+  // 1. タイトル要素（通常・Wizコンポーネント含む）
   const titleEl = card.querySelector(
-    "#video-title, yt-formatted-string#video-title, h3 a, a#video-title-link, .yt-lockup-metadata-view-model-wiz__title"
+    "#video-title, yt-formatted-string#video-title, a#video-title-link, h3 a, h3, [class*='metadata-view-model'] h3, [class*='metadata-view-model'] [role='text']"
   );
-  if (!titleEl) return "";
-  return (
-    titleEl.textContent?.trim() ||
-    titleEl.getAttribute("title")?.trim() ||
-    titleEl.getAttribute("aria-label")?.trim() ||
-    ""
-  );
+  if (titleEl) {
+    const text = titleEl.textContent?.trim() || titleEl.getAttribute("title")?.trim() || "";
+    if (text) return text;
+  }
+
+  // 2. サムネイルのリンク（aria-labelに動画タイトルが記載されているケースが極めて多い）
+  const thumb = card.querySelector("a#thumbnail, a.yt-lockup-view-model__thumbnail-container, a[href*='/watch']");
+  if (thumb) {
+    const aria = thumb.getAttribute("aria-label") || thumb.getAttribute("title") || "";
+    if (aria) return aria.trim();
+    const text = thumb.textContent?.trim();
+    if (text) return text;
+  }
+
+  // 3. 動画再生リンク
+  const watchLink = card.querySelector("a[href*='watch?v=']");
+  if (watchLink) {
+    const text = watchLink.textContent?.trim() || watchLink.getAttribute("title") || watchLink.getAttribute("aria-label") || "";
+    if (text) return text;
+  }
+
+  return "";
 }
 
 function maskVideoCard(card, matchedClub) {
-  if (card.classList.contains("soccer-spoiler-masked") || card.classList.contains("soccer-spoiler-revealed")) {
+  // 既にマスク済みまたは解除済みの場合は重複適用しない
+  if (
+    card.classList.contains("soccer-spoiler-masked") ||
+    card.classList.contains("soccer-spoiler-revealed") ||
+    card.closest(".soccer-spoiler-masked") ||
+    card.querySelector(".soccer-spoiler-overlay")
+  ) {
     return;
   }
+
+  // マスクを配置するコンテナ（#dismissible, #content, またはカード自身）
+  const container = card.querySelector("#dismissible, #content, .yt-lockup-view-model") || card;
 
   card.classList.add("soccer-spoiler-masked");
+  container.classList.add("soccer-spoiler-masked");
 
-  // マスクの挿入先ターゲット
-  const targetContainer = card.querySelector("#dismissible") || card;
-  if (targetContainer !== card) {
-    targetContainer.style.position = "relative";
-  }
-
-  // 既存のオーバーレイがないか確認
-  if (card.querySelector(".soccer-spoiler-overlay")) {
-    return;
-  }
+  // 位置指定
+  container.style.position = "relative";
+  container.style.overflow = "hidden";
+  container.style.borderRadius = "12px";
 
   const overlay = document.createElement("div");
   overlay.className = "soccer-spoiler-overlay";
@@ -105,23 +127,26 @@ function maskVideoCard(card, matchedClub) {
 
       overlay.classList.add("soccer-spoiler-peeling");
       setTimeout(() => {
+        card.classList.remove("soccer-spoiler-masked");
+        container.classList.remove("soccer-spoiler-masked");
         card.classList.add("soccer-spoiler-revealed");
+        container.classList.add("soccer-spoiler-revealed");
         overlay.remove();
       }, 200);
     },
     true
   );
 
-  // ポインターイベントの親要素への透過を防止
-  const blockPropagation = (e) => {
+  // ポインターイベントの親要素（YouTubeリンク）への透過を防止
+  const blockEvent = (e) => {
     e.stopPropagation();
   };
-  overlay.addEventListener("mousedown", blockPropagation, true);
-  overlay.addEventListener("mouseup", blockPropagation, true);
-  overlay.addEventListener("pointerdown", blockPropagation, true);
-  overlay.addEventListener("pointerup", blockPropagation, true);
+  overlay.addEventListener("mousedown", blockEvent, true);
+  overlay.addEventListener("mouseup", blockEvent, true);
+  overlay.addEventListener("pointerdown", blockEvent, true);
+  overlay.addEventListener("pointerup", blockEvent, true);
 
-  targetContainer.appendChild(overlay);
+  container.appendChild(overlay);
 }
 
 function escapeHtml(str) {
@@ -142,7 +167,11 @@ function scanAndMaskSoccerVideos() {
 
   for (let i = 0; i < cards.length; i++) {
     const card = cards[i];
-    if (card.classList.contains("soccer-spoiler-masked") || card.classList.contains("soccer-spoiler-revealed")) {
+    if (
+      card.classList.contains("soccer-spoiler-masked") ||
+      card.classList.contains("soccer-spoiler-revealed") ||
+      card.closest(".soccer-spoiler-masked")
+    ) {
       continue;
     }
 
@@ -167,20 +196,22 @@ function removeAllSoccerMasks() {
 function scheduleSoccerScan() {
   if (!isMaskSoccerEnabled) return;
   if (scanTimeout) clearTimeout(scanTimeout);
-  scanTimeout = setTimeout(() => {
-    scanAndMaskSoccerVideos();
-  }, 120);
+  scanTimeout = setTimeout(scanAndMaskSoccerVideos, 60);
+}
+
+// ページ遷移直後などのロード段階に合わせて段階的に走査
+function triggerScanBurst() {
+  scanAndMaskSoccerVideos();
+  setTimeout(scanAndMaskSoccerVideos, 300);
+  setTimeout(scanAndMaskSoccerVideos, 800);
+  setTimeout(scanAndMaskSoccerVideos, 1500);
+  setTimeout(scanAndMaskSoccerVideos, 3000);
 }
 
 // 5. 動的ローディング（スクロール）の監視
-const observer = new MutationObserver((mutations) => {
+const observer = new MutationObserver(() => {
   if (!isMaskSoccerEnabled) return;
-  for (const m of mutations) {
-    if (m.addedNodes.length > 0) {
-      scheduleSoccerScan();
-      break;
-    }
-  }
+  scheduleSoccerScan();
 });
 
 observer.observe(document.documentElement, {
@@ -188,14 +219,28 @@ observer.observe(document.documentElement, {
   subtree: true
 });
 
+// スクロール時の走査
+window.addEventListener("scroll", scheduleSoccerScan, { passive: true });
+
+// 1.5秒ごとのヘルスチェック走査（動的描画漏れ防止）
+setInterval(() => {
+  if (isMaskSoccerEnabled) {
+    scanAndMaskSoccerVideos();
+  }
+}, 1500);
+
 // 6. YouTubeのSPA画面遷移イベントを監視
 window.addEventListener("yt-navigate-finish", () => {
   checkAndRedirectShortsUrl();
-  scheduleSoccerScan();
+  triggerScanBurst();
+});
+window.addEventListener("yt-page-data-updated", () => {
+  checkAndRedirectShortsUrl();
+  triggerScanBurst();
 });
 window.addEventListener("popstate", () => {
   checkAndRedirectShortsUrl();
-  scheduleSoccerScan();
+  triggerScanBurst();
 });
 
 // 7. バックグラウンドからの設定変更メッセージを受信
@@ -206,7 +251,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.action === "SET_SOCCER_MASK") {
     isMaskSoccerEnabled = message.enabled;
     if (isMaskSoccerEnabled) {
-      scheduleSoccerScan();
+      triggerScanBurst();
     } else {
       removeAllSoccerMasks();
     }
@@ -215,7 +260,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     applyHideShorts(message.hideShorts);
     isMaskSoccerEnabled = message.maskSoccer;
     if (isMaskSoccerEnabled) {
-      scheduleSoccerScan();
+      triggerScanBurst();
     } else {
       removeAllSoccerMasks();
     }
@@ -227,9 +272,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", () => {
     checkAndRedirectShortsUrl();
-    scheduleSoccerScan();
+    triggerScanBurst();
   });
 } else {
   checkAndRedirectShortsUrl();
-  scheduleSoccerScan();
+  triggerScanBurst();
 }

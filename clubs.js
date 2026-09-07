@@ -58,7 +58,7 @@
     { name: "Oxford United", keywords: ["オックスフォード・ユナイテッド", "オックスフォードユナイテッド", "Oxford United"] },
 
     // --- ラ・リーガ 1部 (La Liga EA Sports) ---
-    { name: "Real Madrid", keywords: ["レアル・マドリード", "レアルマドリード", "レアル・マドリー", "レアルマドリー", "レアル", "Real Madrid"] },
+    { name: "Real Madrid", keywords: ["レアル・マドリード", "レアルマドリード", "レアル・マドリー", "レアルマドリー", "レアル", "マドリー", "Real Madrid"] },
     { name: "Barcelona", keywords: ["バルセロナ", "バルサ", "FCバルセロナ", "Barcelona", "Barca", "Barça"] },
     { name: "Atletico Madrid", keywords: ["アトレティコ・マドリード", "アトレティコマドリード", "アトレティコ・マドリー", "アトレティコマドリー", "アトレティコ", "Atletico Madrid", "Atlético Madrid", "Atletico"] },
     { name: "Real Sociedad", keywords: ["レアル・ソシエダ", "レアルソシエダ", "ソシエダ", "Real Sociedad"] },
@@ -138,10 +138,23 @@
 
   const SOCCER_REGEX = new RegExp(`(${patternParts.join("|")})`, "i");
 
+  // 日本語のひらがな・全角英数を正規化（べティス -> ベティス、全角英数 -> 半角など）
+  function normalizeText(str) {
+    if (!str || typeof str !== "string") return "";
+    return str
+      // 全角英数を半角に変換
+      .replace(/[\uff01-\uff5e]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
+      // 全角スペースを半角スペースに
+      .replace(/\u3000/g, " ")
+      // ひらがなをカタカナに変換（べティス -> ベティス、ばるさ -> バルサ等）
+      .replace(/[\u3041-\u3096]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+  }
+
   // マッチ確認用関数
   function matchSoccerClub(title) {
     if (!title || typeof title !== "string") return null;
-    const match = title.match(SOCCER_REGEX);
+    const normalized = normalizeText(title);
+    const match = normalized.match(SOCCER_REGEX);
     return match ? match[0] : null;
   }
 
@@ -149,6 +162,7 @@
   global.__SOCCER_SPOILER__ = {
     CLUBS: SOCCER_CLUBS,
     REGEX: SOCCER_REGEX,
+    normalizeText: normalizeText,
     matchSoccerClub: matchSoccerClub
   };
 })(typeof window !== "undefined" ? window : globalThis);

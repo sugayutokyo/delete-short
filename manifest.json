@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Shorts Blocker (ショート動画非表示)",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "YouTubeのショート動画・ゲームルームの非表示や、サッカーのネタバレ防止マスクを右クリックで手軽に設定できる拡張機能です。",
   "permissions": [
     "contextMenus",
