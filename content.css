@@ -1,0 +1,78 @@
+/* ==========================================================================
+   YouTube Shorts Blocker - Stylesheet
+   Enabled only when html[data-hide-shorts="true"] is set
+   ========================================================================== */
+
+/* 1. ホーム / 登録チャンネル / トレンド等のショート棚 (Shelves) */
+html[data-hide-shorts="true"] ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+html[data-hide-shorts="true"] ytd-rich-section-renderer:has(ytd-reel-shelf-renderer),
+html[data-hide-shorts="true"] ytd-rich-section-renderer:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytd-reel-shelf-renderer,
+html[data-hide-shorts="true"] ytd-rich-shelf-renderer[is-shorts],
+html[data-hide-shorts="true"] ytd-rich-grid-row:has(ytd-rich-shelf-renderer[is-shorts]),
+html[data-hide-shorts="true"] ytd-item-section-renderer:has(ytd-reel-shelf-renderer),
+html[data-hide-shorts="true"] ytm-reel-shelf-renderer {
+    display: none !important;
+}
+
+/* 2. グリッドやフィード内の個別ショート動画 (Individual Shorts items) */
+html[data-hide-shorts="true"] ytd-rich-item-renderer:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytd-video-renderer:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytd-grid-video-renderer:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytd-compact-video-renderer:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytd-reel-item-renderer,
+html[data-hide-shorts="true"] yt-lockup-view-model:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytm-shorts-lockup-view-model {
+    display: none !important;
+}
+
+/* 3. SHORTSオーバーレイ属性を持つ動画要素の非表示 */
+html[data-hide-shorts="true"] ytd-rich-item-renderer:has([overlay-style="SHORTS"]),
+html[data-hide-shorts="true"] ytd-video-renderer:has([overlay-style="SHORTS"]),
+html[data-hide-shorts="true"] ytd-compact-video-renderer:has([overlay-style="SHORTS"]),
+html[data-hide-shorts="true"] ytd-grid-video-renderer:has([overlay-style="SHORTS"]) {
+    display: none !important;
+}
+
+/* 4. 左側サイドバー（ガイド・ミニガイド）の「Shorts / ショート」項目 */
+html[data-hide-shorts="true"] ytd-guide-entry-renderer:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytd-mini-guide-entry-renderer:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytd-guide-entry-renderer:has(a[title="Shorts"]),
+html[data-hide-shorts="true"] ytd-guide-entry-renderer:has(a[title="ショート"]),
+html[data-hide-shorts="true"] ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),
+html[data-hide-shorts="true"] ytd-mini-guide-entry-renderer:has(a[title="ショート"]),
+html[data-hide-shorts="true"] yt-navigation-item:has(a[href^="/shorts"]) {
+    display: none !important;
+}
+
+/* 5. チャンネルページの「ショート」タブ */
+html[data-hide-shorts="true"] yt-tab-shape[tab-title="ショート"],
+html[data-hide-shorts="true"] yt-tab-shape[tab-title="Shorts"],
+html[data-hide-shorts="true"] yt-tab-shape:has(a[href*="/shorts"]),
+html[data-hide-shorts="true"] tp-yt-paper-tab:has(a[href*="/shorts"]) {
+    display: none !important;
+}
+
+/* 6. 検索結果・おすすめ内のショート棚 */
+html[data-hide-shorts="true"] ytd-shelf-renderer:has(a[href^="/shorts"]),
+html[data-hide-shorts="true"] ytd-watch-next-secondary-results-renderer ytd-reel-shelf-renderer {
+    display: none !important;
+}
+
+/* 7. ゲームルーム (Playables) の非表示（サイドバー、棚、フィード内アイテム） */
+html[data-hide-shorts="true"] ytd-guide-entry-renderer:has(a[href*="/playables"]),
+html[data-hide-shorts="true"] ytd-mini-guide-entry-renderer:has(a[href*="/playables"]),
+html[data-hide-shorts="true"] ytd-guide-entry-renderer:has(a[title*="ゲームルーム"]),
+html[data-hide-shorts="true"] ytd-guide-entry-renderer:has(a[title*="Playables"]),
+html[data-hide-shorts="true"] ytd-mini-guide-entry-renderer:has(a[title*="ゲームルーム"]),
+html[data-hide-shorts="true"] ytd-mini-guide-entry-renderer:has(a[title*="Playables"]),
+html[data-hide-shorts="true"] yt-navigation-item:has(a[href*="/playables"]),
+html[data-hide-shorts="true"] ytd-compact-link-renderer:has(a[href*="/playables"]),
+html[data-hide-shorts="true"] ytd-rich-section-renderer:has(a[href*="/playables"]),
+html[data-hide-shorts="true"] ytd-rich-shelf-renderer:has(a[href*="/playables"]),
+html[data-hide-shorts="true"] ytd-rich-item-renderer:has(a[href*="/playables"]),
+html[data-hide-shorts="true"] ytd-shelf-renderer:has(a[href*="/playables"]),
+html[data-hide-shorts="true"] ytd-reel-shelf-renderer:has(a[href*="/playables"]) {
+    display: none !important;
+}
+
