@@ -76,3 +76,116 @@ html[data-hide-shorts="true"] ytd-reel-shelf-renderer:has(a[href*="/playables"])
     display: none !important;
 }
 
+/* ==========================================================================
+   8. サッカーネタバレ防止マスク (Football Spoiler Mask)
+   ========================================================================== */
+
+/* マスク適用中の動画カード */
+.soccer-spoiler-masked {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+}
+
+/* 下地のサムネイルとタイトルをぼかす */
+.soccer-spoiler-masked:not(.soccer-spoiler-revealed) #dismissible,
+.soccer-spoiler-masked:not(.soccer-spoiler-revealed) ytd-thumbnail,
+.soccer-spoiler-masked:not(.soccer-spoiler-revealed) #thumbnail,
+.soccer-spoiler-masked:not(.soccer-spoiler-revealed) #details,
+.soccer-spoiler-masked:not(.soccer-spoiler-revealed) .yt-lockup-view-model__content {
+    filter: blur(14px) brightness(0.7) !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    transition: filter 0.25s ease !important;
+}
+
+/* マスクオーバーレイ */
+.soccer-spoiler-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 140px !important;
+    background: rgba(15, 15, 18, 0.94) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 12px 16px !important;
+    box-sizing: border-box !important;
+    z-index: 9999 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    transition: opacity 0.22s ease, transform 0.22s ease, background 0.2s ease, border-color 0.2s ease !important;
+}
+
+.soccer-spoiler-overlay:hover {
+    background: rgba(26, 26, 32, 0.96) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    transform: scale(1.01) !important;
+}
+
+/* マスクが剥がれるアニメーション */
+.soccer-spoiler-overlay.soccer-spoiler-peeling {
+    opacity: 0 !important;
+    transform: scale(0.95) !important;
+    pointer-events: none !important;
+}
+
+/* アイコンとバッジ */
+.soccer-spoiler-icon {
+    font-size: 28px !important;
+    line-height: 1 !important;
+    margin-bottom: 8px !important;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4)) !important;
+}
+
+.soccer-spoiler-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #f1f1f1 !important;
+    letter-spacing: 0.2px !important;
+    margin-bottom: 4px !important;
+    font-family: Roboto, Arial, sans-serif !important;
+}
+
+.soccer-spoiler-club-badge {
+    display: inline-block !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    background: rgba(255, 75, 75, 0.85) !important;
+    padding: 2px 8px !important;
+    border-radius: 6px !important;
+    margin-bottom: 8px !important;
+    max-width: 90% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.soccer-spoiler-hint {
+    font-size: 12px !important;
+    color: #aaaaaa !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    padding: 4px 12px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.soccer-spoiler-overlay:hover .soccer-spoiler-hint {
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+

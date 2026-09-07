@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "YouTube Shorts Blocker (ショート動画非表示)",
-  "version": "1.0.0",
-  "description": "YouTubeのショート動画を非表示にし、右クリックで手軽にON/OFFを切り替えられる拡張機能です。",
+  "version": "1.1.0",
+  "description": "YouTubeのショート動画・ゲームルームの非表示や、サッカーのネタバレ防止マスクを右クリックで手軽に設定できる拡張機能です。",
   "permissions": [
     "contextMenus",
     "storage",
@@ -12,7 +12,7 @@
     "*://*.youtube.com/*"
   ],
   "action": {
-    "default_title": "YouTube Shorts Blocker",
+    "default_title": "YouTube Shorts & Spoiler Blocker",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -32,6 +32,7 @@
         "content.css"
       ],
       "js": [
+        "clubs.js",
         "content.js"
       ],
       "run_at": "document_start"
